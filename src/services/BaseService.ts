@@ -3,11 +3,11 @@ import axios, {
   AxiosRequestConfig,
   AxiosResponse,
   CreateAxiosDefaults,
-} from 'axios';
-import axiosRetry from 'axios-retry';
-import { getSession } from 'next-auth/react'
+} from "axios";
+import axiosRetry from "axios-retry";
+import { getSession } from "next-auth/react";
 
-import { auth } from '@/auth';
+import { auth } from "@/auth";
 
 type CustomAxiosRequestConfig = AxiosRequestConfig & { appendToken?: boolean };
 
@@ -37,13 +37,13 @@ const processQueue = (error: unknown, token: null | string = null) => {
 };
 
 const headersConfig: Readonly<Record<string, string | boolean>> = {
-  Accept: 'application/json',
-  'Content-Type': 'application/json; charset=utf-8',
+  Accept: "application/json",
+  "Content-Type": "application/json; charset=utf-8",
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 };
 
 class BaseService {
-  private instance: AxiosInstance;
+  protected instance: AxiosInstance;
 
   constructor(config?: CreateAxiosDefaults<any> | undefined) {
     this.instance = this.initHttp(config);
@@ -53,24 +53,26 @@ class BaseService {
   private async handleRequestSuccess(config: any) {
     const { appendToken = true } = config;
 
-    let accessToken = ''
+    let accessToken = "";
 
     try {
       // const session = await auth();
       // const session = await getSession();
       const session = {
         user: {},
-        access_token: ''
-      }
+        access_token: "",
+      };
+
+      console.log('token handleRequestSuccess', this.instance.defaults.headers.Authorization);
 
       const { access_token } = session || {};
     } catch (error) {
-      console.log('error -> session', error)
+      console.log("error -> session", error);
     }
 
     // Add 'appendToken' flag into the request config when the request not use token
     if (appendToken && accessToken) {
-      config.headers['x-access-token'] = accessToken ? accessToken : '';
+      config.headers["x-access-token"] = accessToken ? accessToken : "";
     }
 
     return config;
@@ -151,7 +153,7 @@ class BaseService {
     http.interceptors.request.use(this.handleRequestSuccess);
     http.interceptors.response.use(
       this.handleResponseSuccess,
-      this.handleResponseError.bind(this),
+      this.handleResponseError.bind(this)
     );
 
     return http;
@@ -159,7 +161,7 @@ class BaseService {
 
   get<T = any, R = AxiosResponse<T>>(
     url: string,
-    config?: CustomAxiosRequestConfig,
+    config?: CustomAxiosRequestConfig
   ): Promise<R> {
     const res = this.instance.get<T, R>(url, config);
     return res;
@@ -168,7 +170,7 @@ class BaseService {
   put<T = any, R = AxiosResponse<T>>(
     url: string,
     data?: T,
-    config?: CustomAxiosRequestConfig,
+    config?: CustomAxiosRequestConfig
   ): Promise<R> {
     return this.instance.put<T, R>(url, data, config);
   }
@@ -176,7 +178,7 @@ class BaseService {
   post<T = any, R = AxiosResponse<T>>(
     url: string,
     data?: T,
-    config?: CustomAxiosRequestConfig,
+    config?: CustomAxiosRequestConfig
   ): Promise<R> {
     return this.instance.post<T, R>(url, data, config);
   }
@@ -184,14 +186,14 @@ class BaseService {
   patch<T = any, R = AxiosResponse<T>>(
     url: string,
     data?: T,
-    config?: CustomAxiosRequestConfig,
+    config?: CustomAxiosRequestConfig
   ): Promise<R> {
     return this.instance.patch<T, R>(url, data, config);
   }
 
   delete<T = any, R = AxiosResponse<T>>(
     url: string,
-    config?: CustomAxiosRequestConfig,
+    config?: CustomAxiosRequestConfig
   ): Promise<R> {
     return this.instance.delete<T, R>(url, config);
   }
